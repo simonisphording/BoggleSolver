@@ -1,0 +1,2 @@
+# BoggleSolver
+Boggle solver
