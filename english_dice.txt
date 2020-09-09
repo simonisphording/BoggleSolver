@@ -1,0 +1,18 @@
+# Write the dice here, one per line in capital letters as follows: "ABCDEF"
+# Needs to be exactly 16 dice
+AAEEGN
+ELRTTY
+AOOTTW
+ABBJOO
+EHRTVW
+CIMOTU
+DISTYY
+EIOSST
+DELRVY
+ACHOPS
+HIMNQU
+EEINSU
+EEGHNW
+AFFKPS
+HLNNRZ
+DEILRX

@@ -1,4 +1,3 @@
-from pytrie import StringTrie
 import numpy as np
 from random import shuffle, randint
 import pickle as pkl
@@ -13,17 +12,14 @@ infile.close()
 
 class GameField:
 
-    def __init__(self):
+    def __init__(self, d):
         self.board = np.array([["", "", "", ""], ["", "", "", ""], ["", "", "", ""], ["", "", "", ""]])
-        dice = np.array(
-            ["AAEEGN", "ELRTTY", "AOOTTW", "ABBJOO", "EHRTVW", "CIMOTU", "DISTTY", "EIOSST", "DELRVY", "ACHOPS",
-             "HIMNQU"
-                , "EEINSU", "EEGHNW", "AFFKPS", "HLNNRZ", "DEILRX"])
-        shuffle(dice)
+        self.dice = np.array(d)
+        shuffle(self.dice)
         i = 0
         for x in range(4):
             for y in range(4):
-                self.board[x, y] = dice[i][randint(0, 5)]
+                self.board[x, y] = self.dice[i][randint(0, 5)]
                 i += 1
 
     def show_board(self):
@@ -34,6 +30,16 @@ class GameField:
                 result += " "
             result += "\n"
         return result
+
+
+def read_dice_file(filename):
+    # reads dice file and adds found dice to a list. Ignores lines starting with "#"
+    dice = []
+    f = open(filename, "r")
+    for line in f:
+        if not line[0] is "#":
+            dice.append(line)
+    return dice
 
 
 def is_word(s):
@@ -75,7 +81,8 @@ def search_from_dice(board, s, x, y, visited_coords):
                 search_from_dice(board, s + a, x2, y2, visited_coords)
 
 
-g = GameField()
+d = read_dice_file(r"C:\Users\ispho001\PycharmProjects\BoggleSolver\english_dice.txt")
+g = GameField(d)
 g.show_board()
 
 for x in range(4):
