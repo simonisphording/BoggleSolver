@@ -91,13 +91,9 @@ for x in range(4):
 
 found_words = list(found_words)
 
-print(g.show_board())
+filename = "resultaat.txt"
+f = open(filename, 'w')
+f.write(g.show_board() + "\n")
+f.write("Gevonden woorden:\n")
 for word in sorted(found_words):
-    print(word)
-
-#filename = "resultaat.txt"
-#f = open(filename, 'wb')
-#f.write(g.show_board())
-#f.write("Gevonden woorden:")
-#for word in sorted(found_words):
-#    f.write(word)
+    f.write(word + "\n")
