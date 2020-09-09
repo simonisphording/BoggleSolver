@@ -5,6 +5,9 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Generate a Boggle boardstate and find all words present based on the ' +
                                  'provided dictionary')
+parser.add_argument('-b', '--board', type=str, metavar='\b',
+                    help='a boardstate file containing the boardstate to be used. If provided, the dice file is ignored'
+                    , default=None, required=False)
 parser.add_argument('-d', '--dice', type=str, metavar='\b',
                     help='a txt file containing the dice to be used',
                     default='english_dice.txt', required=False)
@@ -24,15 +27,24 @@ infile.close()
 
 class GameField:
 
-    def __init__(self, d):
-        self.board = np.array([["", "", "", ""], ["", "", "", ""], ["", "", "", ""], ["", "", "", ""]])
-        self.dice = np.array(d)
-        shuffle(self.dice)
-        i = 0
-        for x in range(4):
-            for y in range(4):
-                self.board[x, y] = self.dice[i][randint(0, 5)]
-                i += 1
+    def __init__(self, d, b=None):
+        if b:
+            self.board = np.array(b)
+        else:
+            self.board = np.array([["", "", "", ""], ["", "", "", ""], ["", "", "", ""], ["", "", "", ""]],
+                                  dtype='U100')
+
+            self.dice = np.array(d)
+
+            self.order = [i for i in range(16)]
+            shuffle(self.order)
+
+            i = 0
+            for x in range(4):
+                for y in range(4):
+                    letter = self.dice[self.order[i]][randint(0, 5)]
+                    self.board[x, y] = letter
+                    i += 1
 
     def show_board(self):
         result = ""
@@ -50,8 +62,17 @@ def read_dice_file(filename):
     f = open(filename, "r")
     for line in f:
         if not line[0] is "#":
-            dice.append(line)
+            dice.append(line.split())
     return dice
+
+
+def read_board_file(filename):
+    board = []
+    f = open(filename, "r")
+    for line in f:
+        if not line[0] is "#":
+            board.append(line.split())
+    return board
 
 
 def is_word(s):
@@ -94,8 +115,11 @@ def search_from_dice(board, s, x, y, visited_coords):
 
 
 d = read_dice_file(args.dice)
-g = GameField(d)
-g.show_board()
+if args.board:
+    b = read_board_file(args.board)
+    g = GameField(d, b)
+else:
+    g = GameField(d)
 
 for x in range(4):
     for y in range(4):
@@ -106,6 +130,6 @@ found_words = list(found_words)
 filename = args.output
 f = open(filename, 'w')
 f.write(g.show_board() + "\n")
-f.write("Gevonden woorden:\n")
+f.write("Found words:\n")
 for word in sorted(found_words):
     f.write(word + "\n")
