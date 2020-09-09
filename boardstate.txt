@@ -1,0 +1,5 @@
+# Fill in the boardstate, with one line per row, as follows: "A B C D"
+N A N IJ
+S E D E
+A A H P
+O W T M
