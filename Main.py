@@ -1,6 +1,18 @@
 import numpy as np
 from random import shuffle, randint
 import pickle as pkl
+import argparse
+
+parser = argparse.ArgumentParser(description='Generate a Boggle boardstate and find all words present based on the ' +
+                                 'provided dictionary')
+parser.add_argument('-d', '--dice', type=str, metavar='\b',
+                    help='a txt file containing the dice to be used',
+                    default='english_dice.txt', required=False)
+parser.add_argument('-o', '--output', type=str, metavar='\b',
+                    help='the name of the file in which the result is printed',
+                    default='result.txt', required=False)
+
+args = parser.parse_args()
 
 found_words = set()
 
@@ -81,7 +93,7 @@ def search_from_dice(board, s, x, y, visited_coords):
                 search_from_dice(board, s + a, x2, y2, visited_coords)
 
 
-d = read_dice_file(r"C:\Users\ispho001\PycharmProjects\BoggleSolver\english_dice.txt")
+d = read_dice_file(args.dice)
 g = GameField(d)
 g.show_board()
 
@@ -91,7 +103,7 @@ for x in range(4):
 
 found_words = list(found_words)
 
-filename = "resultaat.txt"
+filename = args.output
 f = open(filename, 'w')
 f.write(g.show_board() + "\n")
 f.write("Gevonden woorden:\n")
