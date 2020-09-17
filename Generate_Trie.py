@@ -1,17 +1,23 @@
 from pytrie import StringTrie
+from os.path import splitext
 import pickle as pkl
 
-dictionary = []
 
-trie = StringTrie()
+def trie_from_word_list(filename):
 
-f = open(r"C:\Users\ispho001\PycharmProjects\BoggleSolver\wordlist.txt", "r")
-for line in f:
-    if " " not in line.rstrip():
-        key = line.rstrip().upper()
-        trie[key] = key
+    trie = StringTrie()
 
-filename = "trie.pkl"
-outfile = open(filename, 'wb')
-pkl.dump(trie, outfile)
-outfile.close()
+    f = open(filename, "r")
+    for line in f:
+        if " " not in line.rstrip():
+            key = line.rstrip().upper()
+            trie[key] = key
+    filename2 = splitext(filename)[0] + "_trie.pkl"
+    outfile = open(filename2, 'wb')
+    pkl.dump(trie, outfile)
+    outfile.close()
+
+
+if __name__ == '__main__':
+    trie_from_word_list(r"C:\Users\ispho001\PycharmProjects\BoggleSolver\wordlist.txt")
+    print("trie generated")

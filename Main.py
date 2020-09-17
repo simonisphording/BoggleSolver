@@ -1,10 +1,9 @@
 import numpy as np
 from random import shuffle, randint
+from os import path
 import pickle as pkl
 import argparse
-
-#TODO: figure out why "NADEN" isn't found
-#TODO: integrate generate_trie
+import Generate_Trie
 
 parser = argparse.ArgumentParser(description='Generate a Boggle boardstate and find all words present based on the ' +
                                  'provided dictionary')
@@ -17,15 +16,11 @@ parser.add_argument('-d', '--dice', type=str, metavar='\b',
 parser.add_argument('-o', '--output', type=str, metavar='\b',
                     help='the name of the file in which the result is printed',
                     default='result.txt', required=False)
+parser.add_argument('-w', '--words', type=str, metavar='\b',
+                    help='a list of words to replace the default wordlist.txt. A trie will be generated',
+                    default='wordlist.txt', required=False)
 
 args = parser.parse_args()
-
-found_words = set()
-
-filename = "trie.pkl"
-infile = open(filename, 'rb')
-trie = pkl.load(infile)
-infile.close()
 
 
 class GameField:
@@ -122,22 +117,34 @@ def search_from_dice(board, s, x, y, visited_coords, debug=False):
                 search_from_dice(board, s + a, x2, y2, temp)
 
 
-d = read_dice_file(args.dice)
-if args.board:
-    b = read_board_file(args.board)
-    g = GameField(d, b)
-else:
-    g = GameField(d)
+if __name__ == '__main__':
 
-for x in range(4):
-    for y in range(4):
-        search_from_dice(g.board, g.board[x, y], x, y, [])
+    found_words = set()
 
-found_words = list(found_words)
+    filename = path.splitext(args.words)[0] + "_trie.pkl"
+    if not path.exists(filename):
+        Generate_Trie.trie_from_word_list(args.words)
 
-filename = args.output
-f = open(filename, 'w')
-f.write(g.show_board() + "\n")
-f.write("Found words:\n")
-for word in sorted(found_words):
-    f.write(word + "\n")
+    infile = open(filename, 'rb')
+    trie = pkl.load(infile)
+    infile.close()
+
+    d = read_dice_file(args.dice)
+    if args.board:
+        b = read_board_file(args.board)
+        g = GameField(d, b)
+    else:
+        g = GameField(d)
+
+    for x in range(4):
+        for y in range(4):
+            search_from_dice(g.board, g.board[x, y], x, y, [])
+
+    found_words = list(found_words)
+
+    filename = args.output
+    f = open(filename, 'w')
+    f.write(g.show_board() + "\n")
+    f.write("Found words:\n")
+    for word in sorted(found_words):
+        f.write(word + "\n")
