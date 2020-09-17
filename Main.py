@@ -3,6 +3,9 @@ from random import shuffle, randint
 import pickle as pkl
 import argparse
 
+#TODO: figure out why "NADEN" isn't found
+#TODO: integrate generate_trie
+
 parser = argparse.ArgumentParser(description='Generate a Boggle boardstate and find all words present based on the ' +
                                  'provided dictionary')
 parser.add_argument('-b', '--board', type=str, metavar='\b',
@@ -101,17 +104,22 @@ def adjacent_coords(x, y):
     return result
 
 
-def search_from_dice(board, s, x, y, visited_coords):
-    visited_coords.append([x, y])
+def search_from_dice(board, s, x, y, visited_coords, debug=False):
+    temp = visited_coords.copy()
+    temp.append([x, y])
+
+    if debug:
+        print(temp, s)
+
     if is_word(s):
         found_words.add(s)
 
     for coord in adjacent_coords(x, y):
-        if coord not in visited_coords:
+        if coord not in temp:
             x2, y2 = coord
             a = board[x2, y2]
             if is_prefix(s + a):
-                search_from_dice(board, s + a, x2, y2, visited_coords)
+                search_from_dice(board, s + a, x2, y2, temp)
 
 
 d = read_dice_file(args.dice)
