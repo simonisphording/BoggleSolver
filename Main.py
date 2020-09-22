@@ -4,6 +4,7 @@ from os import path
 import pickle as pkl
 import argparse
 import Generate_Trie
+from time import time, sleep
 
 parser = argparse.ArgumentParser(description='Generate a Boggle boardstate and find all words present based on the ' +
                                  'provided dictionary')
@@ -14,13 +15,15 @@ parser.add_argument('-d', '--dice', type=str, metavar='\b',
                     help='a txt file containing the dice to be used',
                     default='english_dice.txt', required=False)
 parser.add_argument('-o', '--output', type=str, metavar='\b',
-                    help='the name of the file in which the result is printed',
-                    default='result.txt', required=False)
+                    help='the name of the file in which the result is printed.\
+                     If left blank, the result will not be saved,',
+                    default=None, required=False)
 parser.add_argument('-w', '--words', type=str, metavar='\b',
                     help='a list of words to replace the default wordlist.txt. A trie will be generated',
                     default='wordlist.txt', required=False)
-
-args = parser.parse_args()
+parser.add_argument('-t', '--time', type=int, metavar='\b',
+                    help='the amount of time you get to fill in words',
+                    default=120, required=False)
 
 
 class GameField:
@@ -107,7 +110,7 @@ def search_from_dice(board, s, x, y, visited_coords, debug=False):
         print(temp, s)
 
     if is_word(s):
-        found_words.add(s)
+        all_words.add(s)
 
     for coord in adjacent_coords(x, y):
         if coord not in temp:
@@ -117,9 +120,24 @@ def search_from_dice(board, s, x, y, visited_coords, debug=False):
                 search_from_dice(board, s + a, x2, y2, temp)
 
 
+def points_for_word(word):
+    if len(word) <= 4:
+        return 1
+    elif len(word) == 5:
+        return 2
+    elif len(word) == 6:
+        return 3
+    elif len(word) == 7:
+        return 5
+    else:
+        return 7
+
+
 if __name__ == '__main__':
 
-    found_words = set()
+    args = parser.parse_args()
+
+    all_words = set()
 
     filename = path.splitext(args.words)[0] + "_trie.pkl"
     if not path.exists(filename):
@@ -140,11 +158,57 @@ if __name__ == '__main__':
         for y in range(4):
             search_from_dice(g.board, g.board[x, y], x, y, [])
 
-    found_words = list(found_words)
+    all_words = list(all_words)
 
-    filename = args.output
-    f = open(filename, 'w')
-    f.write(g.show_board() + "\n")
-    f.write("Found words:\n")
+    timeout = args.time
+    found_words = []
+
+    print(g.show_board())
+
+    start = time()
+
+    while(time() < start + timeout):
+        s = input("Type your words here, you have %f seconds!\n" % (start + timeout - time()))
+        s = s.upper()
+        if s in all_words:
+            if s not in found_words:
+                print("correct!")
+                found_words.append(s)
+            else:
+                print('you found this word already!')
+        else:
+            print("This isn't a word")
+        sleep(1)
+        print(g.show_board())
+
+    score = 0
+    for word in found_words:
+        score += points_for_word(word)
+
+    total_score = 0
+    for word in all_words:
+        total_score += points_for_word(word)
+
+    print("congratulations, you got %s out of %s possible points" % (score, total_score))
+
+    print("you found the following words:")
     for word in sorted(found_words):
-        f.write(word + "\n")
+        print(word)
+
+    print("These are the words you missed:")
+    for word in sorted(all_words):
+        if word not in found_words:
+            print(word)
+
+    if args.output:
+        filename = args.output
+        f = open(filename, 'w')
+        f.write(g.show_board() + "\n")
+        f.write("You got %s out of %s possible points in %s seconds\n\n" % (score, total_score, timeout))
+        f.write("Found words:\n\n")
+        for word in sorted(found_words):
+            f.write(word + "\n")
+        f.write("\nWords not found:\n\n")
+        for word in sorted(all_words):
+            if word not in found_words:
+                f.write(word + "\n")
